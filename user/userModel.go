@@ -10,8 +10,8 @@ type User struct {
 	ID                 uuid.UUID  `json:"id" db:"id"`
 	Name               string     `json:"name" db:"name" validate:"required"`
 	Email              string     `json:"email" db:"email" validate:"required,email"`
-	Phone              string     `json:"phone,omitempty" db:"phone"`
-	Address            string     `json:"address,omitempty" db:"address"`
+	Phone              *string    `json:"phone,omitempty" db:"phone"`
+	Address            *string    `json:"address,omitempty" db:"address"`
 	Role               string     `json:"role,omitempty" db:"role"`
 	Status             string     `json:"status,omitempty" db:"status"`
 	SubscriptionStatus string     `json:"subscription_status,omitempty" db:"subscription_status"`

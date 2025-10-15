@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/golang-jwt/jwt/v5"
 )
 
 // AuthMiddleware validates JWT token
@@ -18,19 +17,22 @@ func AuthMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
-		token, err := jwt.ParseWithClaims(tokenStr, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-			return jwtSecret, nil
-		})
-
-		if err != nil || !token.Valid {
-			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid token"})
+		if !strings.HasPrefix(authHeader, "Bearer ") {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid Authorization header format"})
 			c.Abort()
 			return
 		}
 
-		claims := token.Claims.(*Claims)
-		c.Set("claims", claims)
+		tokenStr := strings.TrimPrefix(authHeader, "Bearer ")
+
+		claims, err := ValidateToken(tokenStr)
+		if err != nil {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
+			c.Abort()
+			return
+		}
+
+		c.Set("claims", claims) // store claims for controller use
 		c.Next()
 	}
 }
@@ -38,16 +40,22 @@ func AuthMiddleware() gin.HandlerFunc {
 // AuthorizeRole restricts access based on roles
 func AuthorizeRole(roles ...string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		claims, exists := c.Get("claims")
+		claimsInterface, exists := c.Get("claims")
 		if !exists {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
 			c.Abort()
 			return
 		}
-		userClaims := claims.(*Claims)
+
+		claims, ok := claimsInterface.(*Claims)
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{"error": "Unauthorized"})
+			c.Abort()
+			return
+		}
 
 		for _, role := range roles {
-			if userClaims.Role == role {
+			if claims.Role == role {
 				c.Next()
 				return
 			}

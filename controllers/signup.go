@@ -2,10 +2,11 @@ package controllers
 
 import (
 	"authentication/config"
-	"authentication/helpers"
 	models "authentication/user"
 	"net/http"
 	"time"
+
+	"authentication/helpers"
 
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
@@ -19,12 +20,7 @@ func Signup() gin.HandlerFunc {
 			return
 		}
 
-		if err := helpers.ValidateStruct(user); err != nil {
-			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-			return
-		}
-
-		// Check duplicate
+		// Check duplicate email or phone
 		var count int
 		err := config.DB.Get(&count, "SELECT COUNT(*) FROM users WHERE email=$1 OR phone=$2", user.Email, user.Phone)
 		if err != nil {
@@ -36,16 +32,21 @@ func Signup() gin.HandlerFunc {
 			return
 		}
 
+		// Fill other fields
 		user.ID = uuid.New()
 		user.Role = "CUSTOMER"
 		user.Status = "ACTIVE"
 		user.SubscriptionStatus = "SUBSCRIBED"
 		user.CreatedAt = time.Now()
 		user.UpdatedAt = time.Now()
-		user.Password = helpers.HashPassword(user.Password)
 
-		_, err = config.DB.NamedExec(`INSERT INTO users (id, name, email, phone, address, role, status, subscription_status, password, created_at, updated_at) 
-			VALUES (:id,:name,:email,:phone,:address,:role,:status,:subscription_status,:password,:created_at,:updated_at)`, &user)
+		// Store password as plain text
+		user.Password = user.Password
+
+		_, err = config.DB.NamedExec(`INSERT INTO users 
+		(id, name, email, phone, address, role, status, subscription_status, password, created_at, updated_at) 
+		VALUES 
+		(:id,:name,:email,:phone,:address,:role,:status,:subscription_status,:password,:created_at,:updated_at)`, &user)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
