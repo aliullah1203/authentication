@@ -30,8 +30,12 @@ func GetUser() gin.HandlerFunc {
 			return
 		}
 
+		// ✅ Use this query
 		var user models.User
-		err := config.DB.Get(&user, "SELECT * FROM users WHERE id=$1", requestedUserId)
+		err := config.DB.Get(&user, `
+			SELECT id, name, email, phone, address, role, status, subscription_status, password, created_at, updated_at, deleted_at
+			FROM users WHERE id=$1
+		`, requestedUserId)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"error": "User not found"})
 			return

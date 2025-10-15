@@ -28,8 +28,12 @@ func GetUsers() gin.HandlerFunc {
 			return
 		}
 
+		// ✅ Use this query
 		var users []models.User
-		err := config.DB.Select(&users, "SELECT * FROM users")
+		err := config.DB.Select(&users, `
+			SELECT id, name, email, phone, address, role, status, subscription_status, password, created_at, updated_at, deleted_at
+			FROM users
+		`)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 			return
