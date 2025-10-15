@@ -3,7 +3,7 @@ package services
 import (
 	"authentication/config"
 	"authentication/helpers"
-	"authentication/models"
+	models "authentication/user"
 	"context"
 	"encoding/json"
 	"fmt"
