@@ -1,31 +1,51 @@
 package services
 
 import (
-	"authentication/config"
-	"authentication/helpers"
-	models "authentication/user"
-	"context"
-	"encoding/json"
-	"fmt"
-	"time"
+    "authentication/config"
+    "authentication/helpers"
+    models "authentication/user"
+    "context"
+    "encoding/json"
+    "fmt"
+    "os"
+    "time"
 
-	"github.com/google/uuid"
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/google"
+    "github.com/google/uuid"
+    "golang.org/x/oauth2"
+    "golang.org/x/oauth2/google"
 )
 
-// Google OAuth2 config
-var googleOauthConfig = &oauth2.Config{
-	ClientID:     "YOUR_GOOGLE_CLIENT_ID",
-	ClientSecret: "YOUR_GOOGLE_CLIENT_SECRET",
-	RedirectURL:  "http://localhost:8080/api/oauth/google/callback",
-	Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
-	Endpoint:     google.Endpoint,
+// googleOauthConfig holds the runtime OAuth2 configuration.
+var googleOauthConfig *oauth2.Config
+
+// InitGoogleOAuthFromEnv initializes Google OAuth2 config from environment variables.
+// Required env vars: GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET
+// Optional: GOOGLE_REDIRECT_URL (defaults to http://localhost:8080/api/oauth/google/callback)
+func InitGoogleOAuthFromEnv() error {
+    clientID := os.Getenv("GOOGLE_CLIENT_ID")
+    clientSecret := os.Getenv("GOOGLE_CLIENT_SECRET")
+    redirectURL := os.Getenv("GOOGLE_REDIRECT_URL")
+    if redirectURL == "" {
+        redirectURL = "http://localhost:8080/api/oauth/google/callback"
+    }
+
+    if clientID == "" || clientSecret == "" {
+        return fmt.Errorf("missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET")
+    }
+
+    googleOauthConfig = &oauth2.Config{
+        ClientID:     clientID,
+        ClientSecret: clientSecret,
+        RedirectURL:  redirectURL,
+        Scopes:       []string{"https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile"},
+        Endpoint:     google.Endpoint,
+    }
+    return nil
 }
 
 // GenerateAuthURL generates URL to redirect user to Google login
 func GetGoogleLoginURL(state string) string {
-	return googleOauthConfig.AuthCodeURL(state)
+    return googleOauthConfig.AuthCodeURL(state)
 }
 
 // HandleGoogleCallback handles the callback from Google
