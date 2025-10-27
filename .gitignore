@@ -1,0 +1,15 @@
+# Environment variables
+.env
+
+# Binaries
+*.exe
+*.out
+*.o
+
+# IDE / Editor settings
+.vscode/
+.idea/
+
+# Go build cache
+/bin
+/vendor
