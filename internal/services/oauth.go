@@ -1,8 +1,8 @@
 package services
 
 import (
-	"authentication/config"
 	"authentication/internal/helpers"
+	"authentication/internal/infra/db"
 	models "authentication/internal/models"
 	"context"
 	"encoding/json"
@@ -66,7 +66,7 @@ func HandleGoogleCallback(code string) (*models.User, string, error) {
 	}
 
 	var user models.User
-	err = config.DB.Get(&user, "SELECT * FROM users WHERE email=$1", googleUser.Email)
+	err = db.DB.Get(&user, "SELECT * FROM users WHERE email=$1", googleUser.Email)
 	if err != nil {
 		// Create new user
 		user = models.User{
@@ -79,7 +79,7 @@ func HandleGoogleCallback(code string) (*models.User, string, error) {
 			CreatedAt:          time.Now(),
 			UpdatedAt:          time.Now(),
 		}
-		_, err := config.DB.NamedExec(`INSERT INTO users (id, name, email, role, status, subscription_status, created_at, updated_at)
+		_, err := db.DB.NamedExec(`INSERT INTO users (id, name, email, role, status, subscription_status, created_at, updated_at)
 			VALUES (:id, :name, :email, :role, :status, :subscription_status, :created_at, :updated_at)`, &user)
 		if err != nil {
 			return nil, "", fmt.Errorf("failed to create user: %v", err)

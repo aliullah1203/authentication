@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"authentication/config"
 	"authentication/internal/helpers"
+	"authentication/internal/infra/db"
 	models "authentication/internal/models"
 	"encoding/json"
 	"net/http"
@@ -18,7 +18,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user models.User
-	err := config.DB.Get(&user, "SELECT id, name, email, role, password FROM users WHERE email=$1 LIMIT 1", req.Email)
+	err := db.DB.Get(&user, "SELECT id, name, email, role, password FROM users WHERE email=$1 LIMIT 1", req.Email)
 	if err != nil {
 		http.Error(w, `{"error":"Invalid email or password"}`, http.StatusUnauthorized)
 		return

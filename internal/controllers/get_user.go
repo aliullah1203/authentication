@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"authentication/config"
 	"authentication/internal/helpers"
+	"authentication/internal/infra/db"
 	models "authentication/internal/models"
 	"encoding/json"
 	"net/http"
@@ -27,7 +27,7 @@ func GetUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var user models.User
-	err := config.DB.Get(&user, `SELECT * FROM users WHERE id=$1`, requestedUserID)
+	err := db.DB.Get(&user, `SELECT * FROM users WHERE id=$1`, requestedUserID)
 	if err != nil {
 		http.Error(w, `{"error":"User not found"}`, http.StatusNotFound)
 		return

@@ -1,9 +1,9 @@
-package config
+package db
 
 import (
+	"authentication/config"
 	"fmt"
 	"log"
-	"os"
 
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
@@ -11,13 +11,13 @@ import (
 
 var DB *sqlx.DB
 
-func ConnectPostgres() {
-	host := os.Getenv("DB_HOST")
-	port := os.Getenv("DB_PORT")
-	user := os.Getenv("DB_USER")
-	password := os.Getenv("DB_PASSWORD")
-	dbname := os.Getenv("DB_NAME")
-	sslmode := os.Getenv("DB_SSLMODE")
+func ConnectPostgres(DBconfig config.DBconfig) {
+	host := DBconfig.Host
+	port := DBconfig.Port
+	user := DBconfig.User
+	password := DBconfig.Password
+	dbname := DBconfig.DBName
+	sslmode := DBconfig.SSLMode
 
 	if host == "" || port == "" || user == "" || password == "" || dbname == "" {
 		log.Fatal("Database environment variables are missing")

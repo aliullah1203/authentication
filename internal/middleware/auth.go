@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"authentication/helpers"
+	"authentication/internal/helpers"
 	"log"
 	"net/http"
 	"strings"

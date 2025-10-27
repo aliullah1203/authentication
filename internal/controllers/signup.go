@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"time"
 
-	"authentication/config"
 	"authentication/internal/helpers"
+	"authentication/internal/infra/db"
 	models "authentication/internal/models"
 
 	"github.com/google/uuid"
@@ -29,7 +29,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 
 	// Check duplicate email or phone
 	var count int
-	err := config.DB.Get(&count, "SELECT COUNT(*) FROM users WHERE email=$1 OR phone=$2", user.Email, user.Phone)
+	err := db.DB.Get(&count, "SELECT COUNT(*) FROM users WHERE email=$1 OR phone=$2", user.Email, user.Phone)
 	if err != nil {
 		http.Error(w, `{"error":"database error: `+err.Error()+`"}`, http.StatusInternalServerError)
 		return
@@ -56,7 +56,7 @@ func Signup(w http.ResponseWriter, r *http.Request) {
 	user.UpdatedAt = time.Now()
 
 	// Insert user into DB
-	_, err = config.DB.NamedExec(`INSERT INTO users 
+	_, err = db.DB.NamedExec(`INSERT INTO users 
 		(id, name, email, phone, address, role, status, subscription_status, password, created_at, updated_at) 
 		VALUES 
 		(:id,:name,:email,:phone,:address,:role,:status,:subscription_status,:password,:created_at,:updated_at)`, &user)

@@ -23,12 +23,8 @@ func RegisterHTTPRoutes(router *mux.Router) {
 	// Signup & Login
 	router.HandleFunc("/api/signup", controllers.Signup).Methods("POST")
 	router.HandleFunc("/api/login", controllers.Login).Methods("POST")
-	// Logout route (protected, user must be logged in)
+	// Logout route
 	router.Handle("/api/logout", helpers.AuthMiddleware(http.HandlerFunc(controllers.Logout))).Methods("POST")
-
-	// Users routes
-	router.Handle("/api/users", helpers.AuthMiddleware(http.HandlerFunc(controllers.GetUsers), "ADMIN", "SUPER_ADMIN")).Methods("GET")
-	router.Handle("/api/users/{id}", helpers.AuthMiddleware(http.HandlerFunc(controllers.GetUser), "ADMIN", "SUPER_ADMIN")).Methods("GET")
 
 	// Google OAuth login
 	router.HandleFunc("/api/oauth/google/login", func(w http.ResponseWriter, r *http.Request) {

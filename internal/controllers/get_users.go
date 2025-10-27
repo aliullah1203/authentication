@@ -1,8 +1,8 @@
 package controllers
 
 import (
-	"authentication/config"
 	"authentication/internal/helpers"
+	"authentication/internal/infra/db"
 	models "authentication/internal/models"
 	"encoding/json"
 	"net/http"
@@ -22,7 +22,7 @@ func GetUsers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var users []models.User
-	err := config.DB.Select(&users, `SELECT * FROM users`)
+	err := db.DB.Select(&users, `SELECT * FROM users`)
 	if err != nil {
 		http.Error(w, `{"error":"`+err.Error()+`"}`, http.StatusInternalServerError)
 		return

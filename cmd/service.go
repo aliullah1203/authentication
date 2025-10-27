@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"authentication/config"
+	"authentication/internal/infra/db"
 	"authentication/internal/services"
 	"log"
 	"net/http"
@@ -11,11 +12,19 @@ import (
 )
 
 func Service() {
-	// Load .env file (no fatal if not present, but recommended)
+	// Load .env file
 	config.LoadEnv()
 
-	// Initialize JWT secret and database
-	config.ConnectPostgres()
+	// Connect to postgres
+	cfg := config.DBconfig{
+		Host:     os.Getenv("DB_HOST"),
+		Port:     os.Getenv("DB_PORT"),
+		User:     os.Getenv("DB_USER"),
+		Password: os.Getenv("DB_PASSWORD"),
+		DBName:   os.Getenv("DB_NAME"),
+		SSLMode:  os.Getenv("DB_SSLMODE"),
+	}
+	db.ConnectPostgres(cfg)
 
 	// Initialize Google OAuth config from env
 	if err := services.InitGoogleOAuthFromEnv(); err != nil {

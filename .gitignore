@@ -8,7 +8,6 @@
 
 # IDE / Editor settings
 .vscode/
-.idea/
 
 # Go build cache
 /bin
